@@ -1,5 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+using FluentValidation;
+using TheEmployeeAPI;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>();
+builder.Services.AddProblemDetails();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
@@ -40,21 +46,30 @@ employeeRoute.MapGet("{id:int}", (int id, IRepository<Employee> repo) => {
     });
 });
 
-employeeRoute.MapPost(string.Empty, (CreateEmployeeRequest employee, IRepository<Employee> repo) => {
+employeeRoute.MapPost(string.Empty,
+    async (CreateEmployeeRequest employeeRequest,
+    IRepository<Employee> repo,
+    IValidator<CreateEmployeeRequest> validator) => {
+    var validationResults = await validator.ValidateAsync(employeeRequest);
+    if (!validationResults.IsValid)
+    {
+        return Results.ValidationProblem(validationResults.ToDictionary());
+    }
+
     var newEmployee = new Employee {
-        FirstName = employee.FirstName,
-        LastName = employee.LastName,
-        SocialSecurityNumber = employee.SocialSecurityNumber ?? "123-45-6789",
-        Address1 = employee.Address1,
-        Address2 = employee.Address2,
-        City = employee.City,
-        State = employee.State,
-        ZipCode = employee.ZipCode,
-        PhoneNumber = employee.PhoneNumber,
-        Email = employee.Email
+        FirstName = employeeRequest.FirstName!,
+        LastName = employeeRequest.LastName!,
+        SocialSecurityNumber = employeeRequest.SocialSecurityNumber,
+        Address1 = employeeRequest.Address1,
+        Address2 = employeeRequest.Address2,
+        City = employeeRequest.City,
+        State = employeeRequest.State,
+        ZipCode = employeeRequest.ZipCode,
+        PhoneNumber = employeeRequest.PhoneNumber,
+        Email = employeeRequest.Email
     };
     repo.Create(newEmployee);
-    return Results.Created($"/employees/{newEmployee.Id}", employee);
+    return Results.Created($"/employees/{newEmployee.Id}", employeeRequest);
 });
 
 employeeRoute.MapPut("{id}", (UpdateEmployeeRequest employee, int id, IRepository<Employee> repo) => {

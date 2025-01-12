@@ -3,7 +3,7 @@ public class Employee {
     public required string FirstName {get; set;}
     public required string LastName {get; set;}
 
-    public required string SocialSecurityNumber { get; set; }
+    public string? SocialSecurityNumber { get; set; }
 
     public string? Address1 { get; set; }
     public string? Address2 { get; set; }
