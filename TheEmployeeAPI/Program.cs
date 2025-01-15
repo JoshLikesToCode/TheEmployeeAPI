@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -91,6 +92,7 @@ employeeRoute.MapPut("{id}", (UpdateEmployeeRequest employee, int id, IRepositor
     return Results.Ok(existingEmployee);
 });
 
+app.MapControllers();
 app.Run();
 
 public partial class Program {}
