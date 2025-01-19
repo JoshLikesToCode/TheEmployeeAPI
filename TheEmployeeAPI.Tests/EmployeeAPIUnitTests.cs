@@ -85,7 +85,7 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var client = _factory.CreateClient();
-        var invalidEmployee = new UpdateEmployeeRequest(); // Empty object to trigger validation errors
+        var invalidEmployee = new UpdateEmployeeResponse(); // Empty object to trigger validation errors
 
         // Act
         var response = await client.PutAsJsonAsync($"/employees/{_employeeIdForAddressTest}", invalidEmployee);
