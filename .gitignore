@@ -483,5 +483,9 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
+<<<<<<< Updated upstream
 # VSCode
+=======
+#VSCode
+>>>>>>> Stashed changes
 /.vscode
