@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
@@ -13,6 +14,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<FluentValidationFilter>();
+});
+builder.Services.AddDbContext<AppDbContext>(x => {
+    x.UseSqlite("Data Source=employees.db");
 });
 
 var app = builder.Build();
