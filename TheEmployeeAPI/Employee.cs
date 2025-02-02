@@ -18,6 +18,8 @@ public class Employee {
         public int EmployeeId { get; set; }
         public BenefitType BenefitType { get; set; }
         public decimal Cost { get; set; }
+
+        public Employee Employee {get; set; } = null!;
     }
 
     public enum BenefitType

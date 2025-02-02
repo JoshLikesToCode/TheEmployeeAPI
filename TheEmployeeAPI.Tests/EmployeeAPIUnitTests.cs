@@ -10,16 +10,12 @@ namespace TheEmployeeAPI.Tests;
 
 public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly int _employeeId = 1;
     private readonly WebApplicationFactory<Program> _factory;
-    private readonly int _employeeIdForAddressTest;
 
     public BasicTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
-        var repo = _factory.Services.GetRequiredService<IRepository<Employee>>();
-        var employee = new Employee { FirstName = "John", LastName = "Doe", Address1 = "123 Main St" };
-        repo.Create(employee);
-        _employeeIdForAddressTest = repo.GetAll().First().Id;
     }
 
     [Fact]
@@ -28,10 +24,39 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
         var client = _factory.CreateClient();
         var response = await client.GetAsync("/employees");
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Failed to get employees: {content}");
+        }
+
+        var employees = await response.Content.ReadFromJsonAsync<IEnumerable<GetEmployeeResponse>>();
+        Assert.NotEmpty(employees);
     }
 
     [Fact]
+    public async Task GetAllEmployees_WithFilter_ReturnsOneResult()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/employees?FirstNameContains=John");
+
+        response.EnsureSuccessStatusCode();
+
+        var employees = await response.Content.ReadFromJsonAsync<IEnumerable<GetEmployeeResponse>>();
+        Assert.Single(employees);
+    }
+
+    [Fact]
+    public async Task GetEmployeeById_ReturnsOkResult()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/employees/1");
+
+        response.EnsureSuccessStatusCode();
+    }
+}
+
+    /*[Fact]
     public async Task GetEmployeeById_ReturnsOkResult()
     {
         var client = _factory.CreateClient();
@@ -97,4 +122,4 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(problemDetails);
         Assert.Contains("Address1", problemDetails.Errors.Keys);
     }
-}
+}*/

@@ -1,10 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using static Employee;
 
 public static class SeedData
 {
-    public static void Seed(IServiceProvider serviceProvider)
+    public static void MigrateAndSeed(IServiceProvider serviceProvider)
     {
         var context = serviceProvider.GetRequiredService<AppDbContext>();
+        context.Database.Migrate();
 
         if (!context.Employees.Any())
         {

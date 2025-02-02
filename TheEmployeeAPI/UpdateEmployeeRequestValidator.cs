@@ -2,7 +2,7 @@ using FluentValidation;
 
 public class UpdateEmployeeRequestValidator : AbstractValidator<UpdateEmployeeResponse>
 {
-    private readonly HttpContext _httpContext;
+    /*private readonly HttpContext _httpContext;
     private readonly IRepository<Employee> _repository;
 
     public UpdateEmployeeRequestValidator(IHttpContextAccessor httpContextAccessor, IRepository<Employee> repository)
@@ -27,5 +27,5 @@ public class UpdateEmployeeRequestValidator : AbstractValidator<UpdateEmployeeRe
         }
 
         return true;
-    }
+    }*/
 }

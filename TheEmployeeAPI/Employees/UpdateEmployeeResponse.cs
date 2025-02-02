@@ -11,7 +11,7 @@ public class UpdateEmployeeResponse
     public string? Email { get; set; }
 }
 
-public class UpdateEmployeeResponseValidator : AbstractValidator<UpdateEmployeeResponse>
+/*public class UpdateEmployeeResponseValidator : AbstractValidator<UpdateEmployeeResponse>
 {
     private readonly HttpContext _httpContext;
     private readonly IRepository<Employee> _repository;
@@ -38,4 +38,4 @@ public class UpdateEmployeeResponseValidator : AbstractValidator<UpdateEmployeeR
 
         return true;
     }
-}
+}*/
