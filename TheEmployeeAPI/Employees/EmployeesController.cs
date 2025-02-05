@@ -73,12 +73,11 @@ public class EmployeesController : BaseController
         return Ok(employeeResponse);
     }
 
-/*
     [HttpPost]
     [ProducesResponseType(typeof(GetEmployeeResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult CreateEmployee([FromBody] CreateEmployeeRequest employeeRequest)
+    public async Task<ActionResult> CreateEmployee([FromBody] CreateEmployeeRequest employeeRequest)
     {
         var newEmployee = new Employee
         {
@@ -94,7 +93,8 @@ public class EmployeesController : BaseController
             Email = employeeRequest.Email
         };
 
-        _repository.Create(newEmployee);
+        _dbContext.Employees.Add(newEmployee);
+        await _dbContext.SaveChangesAsync();
         return CreatedAtAction(nameof(GetEmployeeById), new { id = newEmployee.Id }, newEmployee);
     }
 
@@ -104,16 +104,18 @@ public class EmployeesController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult UpdateEmployee(int id, [FromBody] UpdateEmployeeResponse employeeRequest)
+    public async Task<IActionResult> UpdateEmployee(int id, [FromBody] UpdateEmployeeRequest employeeRequest)
     {
-        _logger.LogInformation("Updating employee with id {EmployeeId}", id);
-        var existingEmployee = _repository.GetById(id);
+        _logger.LogInformation("Updating employee with ID: {EmployeeId}", id);
+
+        var existingEmployee = await _dbContext.Employees.AsTracking().SingleOrDefaultAsync(x => x.Id == id);
         if (existingEmployee == null)
         {
-            _logger.LogWarning("Employee with id {EmployeeId} was not found", id);
+            _logger.LogWarning("Employee with ID: {EmployeeId} not found", id);
             return NotFound();
         }
 
+        _logger.LogDebug("Updating employee details for ID: {EmployeeId}", id);
         existingEmployee.Address1 = employeeRequest.Address1;
         existingEmployee.Address2 = employeeRequest.Address2;
         existingEmployee.City = employeeRequest.City;
@@ -122,11 +124,40 @@ public class EmployeesController : BaseController
         existingEmployee.PhoneNumber = employeeRequest.PhoneNumber;
         existingEmployee.Email = employeeRequest.Email;
 
-        _repository.Update(existingEmployee);
-        return Ok(existingEmployee);
+        try
+        {
+            _dbContext.Entry(existingEmployee).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
+            _logger.LogInformation("Employee with ID: {EmployeeId} successfully updated", id);
+            return Ok(existingEmployee);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while updating employee with ID: {EmployeeId}", id);
+            return StatusCode(500, "An error occurred while updating the employee");
+        }
     }
 
-        /// <summary>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteEmployee(int id)
+    {
+        var employee = await _dbContext.Employees.FindAsync(id);
+
+        if (employee == null)
+        {
+            return NotFound();
+        }
+
+        _dbContext.Employees.Remove(employee);
+        await _dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+/*
+    /// <summary>
     /// Gets the benefits for an employee.
     /// </summary>
     /// <param name="employeeId">The ID to get the benefits for.</param>

@@ -18,6 +18,7 @@ builder.Services.AddControllers(options =>
 });
 builder.Services.AddDbContext<AppDbContext>(x => {
     x.UseSqlite("Data Source=employees.db");
+    x.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
 var app = builder.Build();
