@@ -156,7 +156,7 @@ public class EmployeesController : BaseController
 
         return NoContent();
     }
-/*
+
     /// <summary>
     /// Gets the benefits for an employee.
     /// </summary>
@@ -166,16 +166,29 @@ public class EmployeesController : BaseController
     [ProducesResponseType(typeof(IEnumerable<GetEmployeeResponseEmployeeBenefit>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult GetBenefitsForEmployee(int employeeId)
+    public async Task<IActionResult> GetBenefitsForEmployee(int employeeId)
     {
-        var employee = _repository.GetById(employeeId);
+        var employee = await _dbContext.Employees
+            .Include(e => e.Benefits)
+            .ThenInclude(e => e.Benefit)
+            .SingleOrDefaultAsync(e => e.Id == employeeId);
+
         if (employee == null)
         {
             return NotFound();
         }
-        return Ok(employee.Benefits);
+
+        var benefits = employee.Benefits.Select(b => new GetEmployeeResponseEmployeeBenefit
+        {
+            Id = b.Id,
+            Name = b.Benefit.Name,
+            Description = b.Benefit.Description,
+            Cost = b.CostToEmployee ?? b.Benefit.BaseCost   //we want to use the cost to employee if it exists, otherwise we want to use the base cost
+        });
+
+        return Ok(benefits);
     }
-*/
+    
     private GetEmployeeResponse EmployeeToGetEmployeeResponse(Employee employee)
     {
         return new GetEmployeeResponse
@@ -189,13 +202,6 @@ public class EmployeesController : BaseController
             ZipCode = employee.ZipCode,
             PhoneNumber = employee.PhoneNumber,
             Email = employee.Email,
-            Benefits = employee.Benefits.Select(benefit => new GetEmployeeResponseEmployeeBenefit
-            {
-                Id = benefit.Id,
-                EmployeeId = benefit.EmployeeId,
-                BenefitType = benefit.BenefitType,
-                Cost = benefit.Cost
-            }).ToList()
         };
     }
 }

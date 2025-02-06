@@ -10,17 +10,7 @@ public class Employee {
     public string? ZipCode { get; set; }
     public string? PhoneNumber { get; set; }
     public string? Email { get; set; }
-    public IList<EmployeeBenefits> Benefits {get; set;} = new List<EmployeeBenefits>();
-
-    public class EmployeeBenefits
-    {
-        public int Id { get; set; }
-        public int EmployeeId { get; set; }
-        public BenefitType BenefitType { get; set; }
-        public decimal Cost { get; set; }
-
-        public Employee Employee {get; set; } = null!;
-    }
+    public IList<EmployeeBenefit> Benefits {get; set;} = new List<EmployeeBenefit>();
 
     public enum BenefitType
     {

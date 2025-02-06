@@ -12,14 +12,30 @@ public class GetEmployeeResponse
     public string? ZipCode { get; set; }
     public string? PhoneNumber { get; set; }
     public string? Email { get; set; }
+}
 
-    public required List<GetEmployeeResponseEmployeeBenefit> Benefits { get; set; }
+public class Benefit
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public decimal BaseCost { get; set; }
+}
+
+public class EmployeeBenefit
+{
+    public int Id { get; set; }
+    public int EmployeeId { get; set; }
+    public Employee Employee { get; set; } = null!;
+    public int BenefitId { get; set; }
+    public Benefit Benefit { get; set; } = null!;
+    public decimal? CostToEmployee { get; set; }
 }
 
 public class GetEmployeeResponseEmployeeBenefit
 {
     public int Id { get; set; }
-    public int EmployeeId { get; set; }
-    public BenefitType BenefitType { get; set; }
+    public required string Name { get; set; }
+    public required string Description { get; set; }
     public decimal Cost { get; set; }
 }
